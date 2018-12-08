@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600" applicationComplete="{myServ.send()}">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<s:HTTPService id="myServ" url="employeeDataset.xml" fault="myServ_faultHandler(event)" result="myServ_resultHandler(event)"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.StringUtil;
+			
+			
+			[Bindable]public var _persons:ArrayCollection;
+			private var _filterString:String;
+			
+			
+			protected function txtEmployee_enterHandler(filterString:String):void
+			{
+				
+				_filterString = filterString == null ? "" : StringUtil.trim(filterString);
+				_filterString = _filterString.toLowerCase();
+				_persons.filterFunction =filter;
+				_persons.refresh();
+			}
+			
+			
+			public function filter(item:Object):Boolean
+			{
+				if(item.name.toLowerCase().search(txtEmployee.text.toLowerCase()) != -1)
+				{
+					return true;
+				}
+				var age:String=item.age;
+				if(age.toString().toLowerCase().search(txtEmployee.text.toLowerCase()) != -1)
+				{
+					return true;
+				}
+				if(item.nickname.toLowerCase().search(txtEmployee.text.toLowerCase()) != -1)
+				{
+					return true;
+				}
+				var sal:String=item.salary;
+				if(sal.toString().toLowerCase().search(txtEmployee.text.toLowerCase()) != -1)
+				{
+					return true;
+				}
+				
+				return false;
+			}
+			
+			protected function myServ_faultHandler(event:FaultEvent):void
+			{
+				Alert.show("Cannot Load Data");
+				
+			}
+			
+			protected function myServ_resultHandler(event:ResultEvent):void
+			{
+				if(event.result.employee is ArrayCollection)
+				{
+					this._persons =event.result.employee as ArrayCollection 
+				}
+				else
+				{
+					var buffer:ArrayCollection= new ArrayCollection([event.result.employee]);
+					this._persons = buffer;
+				}
+			}
+			
+			public function addPerson():void {
+				_persons.addItem({name:firstInput.text, age:empage.text,nickname:empnickname.text, salary:empsal.text});
+				//clearInputs();
+			}
+			
+		]]>
+	</fx:Script>
+	<s:Panel width="100%" height="100%">
+		
+		
+		<mx:VBox width="100%" height="100%" paddingLeft="10" paddingTop="10">
+			<s:TextInput id="txtEmployee" prompt="Type here to search" enter="txtEmployee_enterHandler(txtEmployee.text)"/>
+			
+			<mx:DataGrid id="dgEmployee" width="50%" height="50%" dataProvider="{_persons}">
+				<mx:columns>
+					<mx:DataGridColumn headerText="#"  dataField="rowNum" sortable="false"/>
+					<mx:DataGridColumn headerText="Name" dataField="name"/>
+					<mx:DataGridColumn headerText="Age" dataField="age"/>
+					<mx:DataGridColumn headerText="Nickname" dataField="nickname"/>
+					<mx:DataGridColumn headerText="Salary" dataField="salary"/>
+					<mx:DataGridColumn headerText="Status" >
+						<mx:itemRenderer>
+							<fx:Component>
+								<mx:HBox horizontalAlign="center">
+									
+									<fx:Script>
+										<![CDATA[
+											import mx.controls.dataGridClasses.DataGridListData;
+											import mx.controls.DataGrid;
+											
+											
+											protected function chk_clickHandler(event:MouseEvent):void
+											{
+												// TODO Auto-generated method stub
+												//data.status==1;
+												if(chk.selected==true)
+												{
+													
+													outerDocument._persons[outerDocument.dgEmployee.selectedIndex].status=1;
+												}
+												else
+												{
+													
+													outerDocument._persons[outerDocument.dgEmployee.selectedIndex].status=0;
+												}
+												
+												colourRendering();
+											}
+											private function colourRendering():void
+											{
+												var listData:DataGridListData = listData as DataGridListData;
+												var g:Graphics=graphics;
+												g.clear();
+												
+												if(data.status=='1')
+												{
+													g.beginFill(0x008000,1);
+													
+													
+												}
+												else if(data.status=='0')
+												{
+													g.beginFill(0xFF0000,1);
+													
+												}
+												g.drawRect(10, 0,unscaledWidth, unscaledHeight);
+												g.endFill();
+											}
+											
+											
+										]]>
+									</fx:Script>
+									
+									<s:CheckBox id="chk" selected="{data.status==1?true:false}" creationComplete="colourRendering()" click="chk_clickHandler(event)"/>
+								</mx:HBox>
+							</fx:Component>
+						</mx:itemRenderer>
+						
+						
+					</mx:DataGridColumn>
+					
+				</mx:columns>
+			</mx:DataGrid>
+			<mx:Form>
+				<mx:FormItem label="First Name">
+					<mx:TextInput id="firstInput" />
+				</mx:FormItem>
+				<mx:FormItem label="Age">
+					<mx:TextInput id="empage" />
+				</mx:FormItem>
+				<mx:FormItem label="Nick Name">
+					<mx:TextInput id="empnickname" />
+				</mx:FormItem>
+				<mx:FormItem label="Salary">
+					<mx:TextInput id="empsal" />
+				</mx:FormItem>
+			</mx:Form>
+			<mx:HBox width="25%" horizontalAlign="center">
+				<mx:Button label="Add" click="addPerson()" />
+			</mx:HBox>
+		</mx:VBox>
+	</s:Panel>
+</s:Application>
