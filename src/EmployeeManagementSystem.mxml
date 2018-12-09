@@ -303,7 +303,7 @@
 								  maxChars="10" width="200"/>
 				</mx:FormItem>
 				<mx:FormItem >
-					<mx:Button id="btnsubmit" label="Submit" chromeColor="#4863A0" click="{currentState='dgState',submitDetails()}"/>
+					<mx:Button id="btnsubmit" label="Submit" chromeColor="#4863A0" color="#FFFFFF" click="{currentState='dgState',submitDetails()}"/>
 				</mx:FormItem>
 			</mx:Form>
 			<mx:HBox width="40%" horizontalAlign="center" includeIn="dgState" >
