@@ -207,7 +207,15 @@
 			<mx:DataGrid id="dgEmployee" width="50%" height="50%" dataProvider="{_employeesArray}" styleName="dataGrid">
 				<mx:columns>
 					<mx:DataGridColumn headerText="#" sortable="false" itemRenderer="Components.rowNumRenderer"/>
-					<mx:DataGridColumn headerText="Name" dataField="name" sortable="true"/>
+					<mx:DataGridColumn headerText="Name (Job Title)" sortable="true">
+						<mx:itemRenderer>
+							<fx:Component>
+								<mx:HBox>
+									<s:Label text="{data.name}" maxDisplayedLines="{-1}" lineBreak="toFit" width="110" height="30"/>
+								</mx:HBox>
+							</fx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
 					<mx:DataGridColumn headerText="Age" dataField="age" sortable="true"/>
 					<mx:DataGridColumn headerText="Nickname" dataField="nickname" sortable="true"/>
 					<mx:DataGridColumn headerText="Salary" dataField="salary" sortable="true"/>
