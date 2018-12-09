@@ -122,10 +122,7 @@
 				}
 				else
 				{
-					var dgRowNum :int=_employeesArray.length + 1;
-					
-					_employeesArray.addItem({rownum:dgRowNum, name:empName.text, age:empAge.text,nickname:empNickname.text, salary:empSal.text, status:0});
-					
+					_employeesArray.addItem({name:empName.text, age:empAge.text,nickname:empNickname.text, salary:empSal.text, status:0});
 					clearInputs();
 				}
 			}
@@ -209,7 +206,7 @@
 			
 			<mx:DataGrid id="dgEmployee" width="50%" height="50%" dataProvider="{_employeesArray}" styleName="dataGrid">
 				<mx:columns>
-					<mx:DataGridColumn headerText="#"  dataField="rownum" sortable="false" />
+					<mx:DataGridColumn headerText="#" sortable="false" itemRenderer="Components.rowNumRenderer"/>
 					<mx:DataGridColumn headerText="Name" dataField="name" sortable="true"/>
 					<mx:DataGridColumn headerText="Age" dataField="age" sortable="true"/>
 					<mx:DataGridColumn headerText="Nickname" dataField="nickname" sortable="true"/>
