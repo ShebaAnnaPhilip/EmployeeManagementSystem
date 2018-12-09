@@ -8,7 +8,10 @@ package Components
 		{
 			super();
 			this.setStyle("chromeColor","green");
-			this.toolTip = "Click to see all green status";
+			this.toolTip = "Click here to see all green status";
+			this.width=20;
+			this.height=20;
+			
 		}
 	}
 }

@@ -10,7 +10,9 @@ package Components
 		{
 			super();
 			this.setStyle("chromeColor","red");
-			this.toolTip = "Click to see all red status";
+			this.toolTip = "Click here to see all red status";
+			this.width=20;
+			this.height=20;
 		}
 	}
 }
