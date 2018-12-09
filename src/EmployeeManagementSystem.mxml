@@ -29,18 +29,26 @@
 			
 			public function init():void
 			{
-				txtEmployee.text='';
-				dgEmployee.dataProvider=_employeesArray;
-				clearInputs();
+				try
+				{
+					txtEmployee.text='';
+					dgEmployee.dataProvider=_employeesArray;
+					clearInputs();
+				} 
+				catch(e:Error) 
+				{
+					
+				}
+				
 			}
-			
 			
 			protected function txtEmployee_enterHandler(filterString:String):void
 			{
 				if(filterString==''||null)
 				{
+					_employeesArray=_newemployees;
 					_employeesArray.refresh();
-					dgEmployee.dataProvider=_employeesArray
+					dgEmployee.dataProvider=_employeesArray;
 				}
 				else
 				{
@@ -154,30 +162,6 @@
 				}
 				_employeesArray=_newemployeesArray;
 				_employeesArray.refresh();
-				_employeesArray.addEventListener(CollectionEvent.COLLECTION_CHANGE,onDataChange)
-				dgEmployee.invalidateDisplayList();
-				dgEmployee.validateNow();
-			}
-			private function onDataChange(event:CollectionEvent):void
-			{
-				var g:Graphics=graphics;
-				g.clear();
-				for(var j:int=0;j<(_employeesArray.length);j++)
-				{
-					if(_employeesArray[j].status=='1')
-					{
-						g.beginFill(0x008000,1);
-						
-					}
-					else if(_employeesArray[j].status=='0')
-					{
-						g.beginFill(0xFF0000,1);
-						
-					}
-				}
-				
-				g.drawRect(10, 0,unscaledWidth, unscaledHeight);
-				g.endFill();
 			}
 			
 			
@@ -239,6 +223,10 @@
 										<![CDATA[
 											import mx.controls.DataGrid;
 											
+											override public function set data( value:Object ) : void {
+												super.data = value;
+												colourRendering();
+											}
 											protected function chk_clickHandler(event:MouseEvent):void
 											{
 												if(chk.selected==true)
