@@ -19,27 +19,36 @@
 			import mx.utils.StringUtil;
 			
 			
-			[Bindable]public var _persons:ArrayCollection;
-			[Bindable]public var _newpersons:ArrayCollection=new ArrayCollection();;
+			[Bindable]public var _employeesArray:ArrayCollection;
+			[Bindable]public var _newemployeesArray:ArrayCollection=new ArrayCollection();;
 			[Bindable]public var _newemployees:ArrayCollection=new ArrayCollection();
-			private var _filterString:String;
 			[Bindable] private var dgIndex:int = new int();  //hold the dataGrid selectedIndex value
 			[Bindable] private var vScroll:int = new int();  //hold the dataGrid verticalScroll position
+			
+			private var _filterString:String;
+			
 			public function init():void
 			{
 				txtEmployee.text='';
-				dgEmployee.dataProvider=_persons;
+				dgEmployee.dataProvider=_employeesArray;
 				clearInputs();
 			}
 			
 			
 			protected function txtEmployee_enterHandler(filterString:String):void
 			{
-				
-				_filterString = filterString == null ? "" : StringUtil.trim(filterString);
-				_filterString = _filterString.toLowerCase();
-				_persons.filterFunction =filter;
-				_persons.refresh();
+				if(filterString==''||null)
+				{
+					_employeesArray.refresh();
+					dgEmployee.dataProvider=_employeesArray
+				}
+				else
+				{
+					_filterString = StringUtil.trim(filterString);
+					_filterString = _filterString.toLowerCase();
+					_employeesArray.filterFunction =filter;
+					_employeesArray.refresh();
+				}
 			}
 			
 			
@@ -75,21 +84,22 @@
 			
 			protected function myServ_resultHandler(event:ResultEvent):void
 			{
+				
 				if(event.result.employee is ArrayCollection)
 				{
-					this._persons =event.result.employee as ArrayCollection 
+					this._employeesArray =event.result.employee as ArrayCollection 
 				}
 				else
 				{
 					var buffer:ArrayCollection= new ArrayCollection([event.result.employee]);
-					this._persons = buffer;
+					this._employeesArray = buffer;
 				}
-				this._newemployees=this._persons;
+				this._newemployees=this._employeesArray;
 			}
 			
 			private function addEmployee():void
 			{
-				dgIndex = _persons.length + 1;
+				dgIndex = _employeesArray.length + 1;
 				vScroll = dgIndex +4;
 				dgEmployee.validateNow();
 				dgEmployee.verticalScrollPosition = dgIndex-10;
@@ -104,11 +114,11 @@
 				}
 				else
 				{
-				var dgRowNum :int=_persons.length + 1;
-				
-				_persons.addItem({rownum:dgRowNum, name:empName.text, age:empAge.text,nickname:empNickname.text, salary:empSal.text, status:0});
-				
-				clearInputs();
+					var dgRowNum :int=_employeesArray.length + 1;
+					
+					_employeesArray.addItem({rownum:dgRowNum, name:empName.text, age:empAge.text,nickname:empNickname.text, salary:empSal.text, status:0});
+					
+					clearInputs();
 				}
 			}
 			private function clearInputs():void
@@ -120,31 +130,31 @@
 			}
 			protected function Status_clickHandler(empstatus:String):void
 			{
-				_persons = _newemployees;
+				_employeesArray = _newemployees;
 				var copy_object:Object;
-				_newpersons.removeAll();
+				_newemployeesArray.removeAll();
 				
 				
-				for(var j:int=0;j<(_persons.length);j++)
+				for(var j:int=0;j<(_employeesArray.length);j++)
 				{
-					if(empstatus == '1' &&_persons[j].status=='1')
+					if(empstatus == '1' &&_employeesArray[j].status=='1')
 					{
-						copy_object=_persons.getItemAt(j);
-						_newpersons.addItem(copy_object);
+						copy_object=_employeesArray.getItemAt(j);
+						_newemployeesArray.addItem(copy_object);
 						
 					}
-					else if(empstatus == '0' &&_persons[j].status=='0')
+					else if(empstatus == '0' &&_employeesArray[j].status=='0')
 					{
-						copy_object=_persons.getItemAt(j);
-						_newpersons.addItem(copy_object);
+						copy_object=_employeesArray.getItemAt(j);
+						_newemployeesArray.addItem(copy_object);
 						
 					}
 					else{}
 					
 				}
-				_persons=_newpersons;
-				_persons.refresh();
-				_persons.addEventListener(CollectionEvent.COLLECTION_CHANGE,onDataChange)
+				_employeesArray=_newemployeesArray;
+				_employeesArray.refresh();
+				_employeesArray.addEventListener(CollectionEvent.COLLECTION_CHANGE,onDataChange)
 				dgEmployee.invalidateDisplayList();
 				dgEmployee.validateNow();
 			}
@@ -152,14 +162,14 @@
 			{
 				var g:Graphics=graphics;
 				g.clear();
-				for(var j:int=0;j<(_persons.length);j++)
+				for(var j:int=0;j<(_employeesArray.length);j++)
 				{
-					if(_persons[j].status=='1')
+					if(_employeesArray[j].status=='1')
 					{
 						g.beginFill(0x008000,1);
 						
 					}
-					else if(_persons[j].status=='0')
+					else if(_employeesArray[j].status=='0')
 					{
 						g.beginFill(0xFF0000,1);
 						
@@ -213,13 +223,13 @@
 			</mx:HBox>
 			
 			
-			<mx:DataGrid id="dgEmployee" width="50%" height="50%" dataProvider="{_persons}" styleName="dataGrid">
+			<mx:DataGrid id="dgEmployee" width="50%" height="50%" dataProvider="{_employeesArray}" styleName="dataGrid">
 				<mx:columns>
 					<mx:DataGridColumn headerText="#"  dataField="rownum" sortable="false" />
-					<mx:DataGridColumn headerText="Name" dataField="name"/>
-					<mx:DataGridColumn headerText="Age" dataField="age"/>
-					<mx:DataGridColumn headerText="Nickname" dataField="nickname"/>
-					<mx:DataGridColumn headerText="Salary" dataField="salary"/>
+					<mx:DataGridColumn headerText="Name" dataField="name" sortable="true"/>
+					<mx:DataGridColumn headerText="Age" dataField="age" sortable="true"/>
+					<mx:DataGridColumn headerText="Nickname" dataField="nickname" sortable="true"/>
+					<mx:DataGridColumn headerText="Salary" dataField="salary" sortable="true"/>
 					<mx:DataGridColumn headerText="Status" >
 						<mx:itemRenderer>
 							<fx:Component>
@@ -233,11 +243,13 @@
 											{
 												if(chk.selected==true)
 												{
-													outerDocument._persons[outerDocument.dgEmployee.selectedIndex].status=1;
+													outerDocument._employeesArray[outerDocument.dgEmployee.selectedIndex].status=1;
+													data.status=='1'
 												}
 												else
 												{
-													outerDocument._persons[outerDocument.dgEmployee.selectedIndex].status=0;
+													outerDocument._employeesArray[outerDocument.dgEmployee.selectedIndex].status=0;
+													data.status=='0'
 												}
 												
 												colourRendering();
@@ -276,7 +288,7 @@
 			<mx:Form includeIn="addState">
 				<mx:FormItem label="Name">
 					<mx:TextInput id="empName" restrict="a-zA-Z"
-												maxChars="40"  width="200"/>
+								  maxChars="40"  width="200"/>
 				</mx:FormItem>
 				<mx:FormItem label="Age" >
 					<mx:TextInput id="empAge" restrict="0-9"
