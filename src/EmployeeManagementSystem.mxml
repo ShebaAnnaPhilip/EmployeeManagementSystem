@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
 			   xmlns:s="library://ns.adobe.com/flex/spark" 
-			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600" applicationComplete="{myServ.send()}">
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600" 
+			   applicationComplete="{myServ.send()}" xmlns:Components="Components.*" creationComplete="init()">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 		<s:HTTPService id="myServ" url="employeeDataset.xml" fault="myServ_faultHandler(event)" result="myServ_resultHandler(event)"/>
@@ -10,6 +11,7 @@
 		<![CDATA[
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
+			import mx.events.CollectionEvent;
 			import mx.events.FlexEvent;
 			import mx.rpc.events.FaultEvent;
 			import mx.rpc.events.ResultEvent;
@@ -17,7 +19,14 @@
 			
 			
 			[Bindable]public var _persons:ArrayCollection;
+			[Bindable]public var _newpersons:ArrayCollection=new ArrayCollection();;
+			[Bindable]public var _newemployees:ArrayCollection=new ArrayCollection();
 			private var _filterString:String;
+			public function init():void
+			{
+				txtEmployee.text='';
+				dgEmployee.dataProvider=_persons;
+			}
 			
 			
 			protected function txtEmployee_enterHandler(filterString:String):void
@@ -71,6 +80,7 @@
 					var buffer:ArrayCollection= new ArrayCollection([event.result.employee]);
 					this._persons = buffer;
 				}
+				this._newemployees=this._persons;
 			}
 			
 			public function addPerson():void {
@@ -78,17 +88,81 @@
 				//clearInputs();
 			}
 			
+			protected function Status_clickHandler(empstatus:String):void
+			{
+				_persons = _newemployees;
+				var copy_object:Object;
+				_newpersons.removeAll();
+				
+				
+				for(var j:int=0;j<(_persons.length);j++)
+				{
+					if(empstatus == '1' &&_persons[j].status=='1')
+					{
+						copy_object=_persons.getItemAt(j);
+						_newpersons.addItem(copy_object);
+						
+					}
+					else if(empstatus == '0' &&_persons[j].status=='0')
+					{
+						copy_object=_persons.getItemAt(j);
+						_newpersons.addItem(copy_object);
+						
+					}
+					else{}
+					
+				}
+				_persons=_newpersons;
+				_persons.refresh();
+				_persons.addEventListener(CollectionEvent.COLLECTION_CHANGE,onDataChange)
+				dgEmployee.invalidateDisplayList();
+				dgEmployee.validateNow();
+			}
+			private function onDataChange(event:CollectionEvent):void
+			{
+				var g:Graphics=graphics;
+				g.clear();
+				for(var j:int=0;j<(_persons.length);j++)
+				{
+					if(_persons[j].status=='1')
+					{
+						g.beginFill(0x008000,1);
+						
+					}
+					else if(_persons[j].status=='0')
+					{
+						g.beginFill(0xFF0000,1);
+						
+					}
+				}
+				
+				g.drawRect(10, 0,unscaledWidth, unscaledHeight);
+				g.endFill();
+			}
+			
 		]]>
 	</fx:Script>
+	<s:states>
+		<s:State name="dgState"/>
+		<s:State name="addState"/>
+	</s:states>
 	<s:Panel width="100%" height="100%">
 		
 		
 		<mx:VBox width="100%" height="100%" paddingLeft="10" paddingTop="10">
-			<s:TextInput id="txtEmployee" prompt="Type here to search" enter="txtEmployee_enterHandler(txtEmployee.text)"/>
+			<mx:HBox width="100%" horizontalGap="10">
+				<mx:HBox horizontalGap="5" width="20%">
+				<s:TextInput id="txtEmployee" prompt="Type here to search" enter="txtEmployee_enterHandler(txtEmployee.text)" width="100%"/>
+				<s:Image id="imgSearchIcon" source="searchIconSmall.png"/>
+					</mx:HBox>
+				<Components:customGreenButton id="greenStatus" click="Status_clickHandler('1')"/>
+				<Components:customRedButton id="redStatus" click="Status_clickHandler('0')"/>
+			</mx:HBox>
+			
 			
 			<mx:DataGrid id="dgEmployee" width="50%" height="50%" dataProvider="{_persons}">
 				<mx:columns>
-					<mx:DataGridColumn headerText="#"  dataField="rowNum" sortable="false"/>
+					<mx:DataGridColumn headerText="#"  dataField="rownum" sortable="false"/>
 					<mx:DataGridColumn headerText="Name" dataField="name"/>
 					<mx:DataGridColumn headerText="Age" dataField="age"/>
 					<mx:DataGridColumn headerText="Nickname" dataField="nickname"/>
@@ -100,22 +174,16 @@
 									
 									<fx:Script>
 										<![CDATA[
-											import mx.controls.dataGridClasses.DataGridListData;
 											import mx.controls.DataGrid;
-											
 											
 											protected function chk_clickHandler(event:MouseEvent):void
 											{
-												// TODO Auto-generated method stub
-												//data.status==1;
 												if(chk.selected==true)
 												{
-													
 													outerDocument._persons[outerDocument.dgEmployee.selectedIndex].status=1;
 												}
 												else
 												{
-													
 													outerDocument._persons[outerDocument.dgEmployee.selectedIndex].status=0;
 												}
 												
@@ -123,14 +191,12 @@
 											}
 											private function colourRendering():void
 											{
-												var listData:DataGridListData = listData as DataGridListData;
 												var g:Graphics=graphics;
 												g.clear();
 												
 												if(data.status=='1')
 												{
 													g.beginFill(0x008000,1);
-													
 													
 												}
 												else if(data.status=='0')
@@ -151,27 +217,28 @@
 							</fx:Component>
 						</mx:itemRenderer>
 						
-						
 					</mx:DataGridColumn>
-					
 				</mx:columns>
 			</mx:DataGrid>
-			<mx:Form>
-				<mx:FormItem label="First Name">
+			<mx:Form includeIn="addState">
+				<mx:FormItem label="Name">
 					<mx:TextInput id="firstInput" />
 				</mx:FormItem>
 				<mx:FormItem label="Age">
 					<mx:TextInput id="empage" />
 				</mx:FormItem>
-				<mx:FormItem label="Nick Name">
+				<mx:FormItem label="Nickname">
 					<mx:TextInput id="empnickname" />
 				</mx:FormItem>
 				<mx:FormItem label="Salary">
 					<mx:TextInput id="empsal" />
 				</mx:FormItem>
+				<mx:FormItem >
+					<mx:Button id="submit" label="Submit" click="addPerson()"/>
+				</mx:FormItem>
 			</mx:Form>
-			<mx:HBox width="25%" horizontalAlign="center">
-				<mx:Button label="Add" click="addPerson()" />
+			<mx:HBox width="25%" horizontalAlign="center" includeIn="dgState" >
+				<mx:Button label="Add Employee" click="{currentState='addState'}"/>
 			</mx:HBox>
 		</mx:VBox>
 	</s:Panel>
